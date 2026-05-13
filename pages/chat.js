@@ -3,16 +3,18 @@ import { useRouter } from 'next/router';
 import LiveChat from '../components/LiveChat';
 import PersistentChat from '../components/PersistentChat';
 
-const Chat = ({ username, mode, targetUsername }) => {
+const Chat = ({ username, mode, targetUsername, persistentRoom }) => {
 	const router = useRouter();
 
 	useEffect(() => {
 		if (!username) router.replace('/');
 		else if (mode === 'live' && !targetUsername) router.replace('/');
-	}, [username, mode, targetUsername, router]);
+		else if (mode === 'persistent' && !persistentRoom) router.replace('/');
+	}, [username, mode, targetUsername, persistentRoom, router]);
 
 	if (!username) return null;
 	if (mode === 'live' && !targetUsername) return null;
+	if (mode === 'persistent' && !persistentRoom) return null;
 
 	const handleSignOut = () => router.push('/');
 
@@ -26,7 +28,11 @@ const Chat = ({ username, mode, targetUsername }) => {
 						onSignOut={handleSignOut}
 					/>
 				) : (
-					<PersistentChat username={username} onSignOut={handleSignOut} />
+					<PersistentChat
+						username={username}
+						persistentRoom={persistentRoom}
+						onSignOut={handleSignOut}
+					/>
 				)}
 			</div>
 		</div>

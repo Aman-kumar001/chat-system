@@ -7,12 +7,14 @@ function MyApp({ Component, pageProps }) {
 	const [username, setUsername] = useState('');
 	const [mode, setMode] = useState('live');
 	const [targetUsername, setTargetUsername] = useState('');
+	const [persistentRoom, setPersistentRoom] = useState('');
 	const router = useRouter();
 
 	const handleLogin = (e) => {
 		e.preventDefault();
 		if (!username.trim()) return;
 		if (mode === 'live' && !targetUsername.trim()) return;
+		if (mode === 'persistent' && !persistentRoom.trim()) return;
 		router.push('/chat');
 	};
 
@@ -29,6 +31,8 @@ function MyApp({ Component, pageProps }) {
 				setMode={setMode}
 				targetUsername={targetUsername}
 				handleTargetChange={(e) => setTargetUsername(e.target.value)}
+				persistentRoom={persistentRoom}
+				handlePersistentRoomChange={(e) => setPersistentRoom(e.target.value)}
 				handleLogin={handleLogin}
 				{...pageProps}
 			/>

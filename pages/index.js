@@ -8,6 +8,8 @@ export default function Login({
 	setMode,
 	targetUsername,
 	handleTargetChange,
+	persistentRoom,
+	handlePersistentRoomChange,
 }) {
 	const tabClass = (active) =>
 		`flex-1 py-2 text-sm rounded-md transition font-medium ${
@@ -50,7 +52,7 @@ export default function Login({
 					<p className='text-neutral-300 text-sm text-center mb-5'>
 						{mode === 'live'
 							? 'Pick your username and who you want to chat with.'
-							: 'Enter your username to join the room.'}
+							: 'Pick a username and a room. History is kept.'}
 					</p>
 
 					<div className='flex flex-col gap-3'>
@@ -72,12 +74,28 @@ export default function Login({
 							/>
 						)}
 
-						<Button text={mode === 'live' ? 'Start Chat' : 'Enter Chat'} />
+						{mode === 'persistent' && (
+							<input
+								type='text'
+								value={persistentRoom}
+								onChange={handlePersistentRoomChange}
+								className='glass-input placeholder-neutral-500 rounded-md px-3.5 py-2.5 text-sm'
+								placeholder='room name (e.g. general)'
+							/>
+						)}
+
+						<Button
+							text={mode === 'live' ? 'Start Chat' : 'Join Room'}
+						/>
 					</div>
 
-					{mode === 'live' && (
+					{mode === 'live' ? (
 						<p className='text-xs text-neutral-500 text-center mt-5'>
 							Strictly live. No history. Messages disappear when you leave.
+						</p>
+					) : (
+						<p className='text-xs text-neutral-500 text-center mt-5'>
+							Messages persist in this room. Anyone with the room name can read.
 						</p>
 					)}
 				</form>
