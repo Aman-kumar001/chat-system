@@ -2,7 +2,7 @@ const Button = ({ text }) => {
 	return (
 		<button
 			type='submit'
-			className='bg-green-500 py-2 px-2 rounded-md text-white max-w-sm mt-3 h-full'
+			className='btn-primary py-2.5 px-4 rounded-md font-semibold mt-3 text-sm'
 		>
 			{text}
 		</button>

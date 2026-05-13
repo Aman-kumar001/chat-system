@@ -1,16 +1,18 @@
-const SendMessage = ({ handleSubmit, handleMessageChange, message }) => {
+const SendMessage = ({ handleSubmit, handleMessageChange, message, disabled }) => {
 	return (
-		<form onSubmit={handleSubmit} className='grid grid-cols-4 items-baseline '>
+		<form onSubmit={handleSubmit} className='flex items-center gap-2'>
 			<input
 				type='text'
 				value={message}
 				onChange={handleMessageChange}
-				className='col-span-3 focus:outline-none focus:ring-1 focus:ring-green-500 border-2 w-full border-gray-200 rounded-l-md px-2 py-2'
-				placeholder='start typing....'
+				disabled={disabled}
+				className='glass-input flex-1 placeholder-neutral-500 rounded-md px-3.5 py-2.5 text-sm disabled:opacity-50'
+				placeholder={disabled ? 'waiting…' : 'type a message…'}
 			/>
 			<button
 				type='submit'
-				className='bg-green-500 px-2 rounded-r-md text-white max-w-sm h-full'
+				disabled={disabled}
+				className='btn-primary px-5 py-2.5 rounded-md font-semibold text-sm'
 			>
 				Send
 			</button>

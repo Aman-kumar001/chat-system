@@ -3,21 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider next dev",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider next build",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider next start"
   },
   "dependencies": {
     "@pusher/push-notifications-web": "^1.1.0",
-    "autoprefixer": "^10.0.4",
     "axios": "^0.21.1",
     "cors": "^2.8.5",
     "next": "latest",
-    "postcss": "^8.1.10",
+    "peerjs": "1.4.7",
     "pusher": "^5.0.0",
     "pusher-js": "^7.0.3",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "tailwindcss": "^2.0.2"
+    "react-dom": "^17.0.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^3.4.19"
   }
 }
