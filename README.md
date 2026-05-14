@@ -35,6 +35,111 @@ The client-side Pusher app key is currently hard-coded in [components/Persistent
 
 PeerJS uses the public PeerServer at `peerjs.com` by default. No config required, but it is a third-party signaling server (see "Privacy" below).
 
+## Flow
+
+### Overall
+
+```mermaid
+flowchart TD
+    Start([User opens /]) --> Login[Login screen]
+    Login --> Mode{Choose mode}
+    Mode -->|Live P2P| LiveInput["Enter your username<br/>+ other person's username"]
+    Mode -->|Persistent| PersInput["Enter your username<br/>+ room name"]
+    LiveInput --> RouteL[/chat]
+    PersInput --> RouteP[/chat]
+    RouteL --> LiveChat[LiveChat component]
+    RouteP --> PersChat[PersistentChat component]
+
+    LiveChat --> PeerOpen["Peer opens<br/>id = buddydr-yourname"]
+    PeerOpen --> Try["peer.connect target"]
+    Try --> Q{Connected?}
+    Q -->|Yes| LiveLoop["Send/recv over<br/>WebRTC data channel<br/>(DTLS, ephemeral)"]
+    Q -->|No| Retry["Wait 3 s, retry"]
+    Retry --> Try
+    LiveLoop -->|tab closed| Cleanup["peer.destroy()<br/>state cleared"]
+
+    PersChat --> Hist["GET /api/messages?room=..."]
+    Hist --> Sub["Subscribe to<br/>presence-room-<name>"]
+    Sub --> PersLoop["Send via POST<br/>recv via Pusher event<br/>(history kept in SQLite)"]
+```
+
+### Live (P2P) — message path
+
+```mermaid
+sequenceDiagram
+    participant A as Alice (browser)
+    participant PS as PeerJS signaling
+    participant B as Bob (browser)
+
+    A->>PS: register id "buddydr-alice"
+    B->>PS: register id "buddydr-bob"
+    A->>PS: connect("buddydr-bob") (SDP offer)
+    PS->>B: incoming offer
+    B->>PS: SDP answer
+    PS->>A: deliver answer
+    Note over A,B: ICE / STUN — direct path negotiated
+    A-->>B: open WebRTC data channel (DTLS)
+    A->>B: send {type:'msg', username, message}
+    B-->>A: send {type:'msg', username, message}
+    Note over A,B: signaling server never sees message content
+```
+
+### Persistent rooms — message path
+
+```mermaid
+sequenceDiagram
+    participant C as Client (you)
+    participant API as Next.js API
+    participant DB as SQLite
+    participant PU as Pusher
+    participant C2 as Other client(s)
+
+    C->>API: GET /api/messages?room=general
+    API->>DB: SELECT last 200 WHERE room=...
+    DB-->>API: rows
+    API-->>C: history JSON
+    C->>PU: subscribe("presence-room-general")
+    C2->>PU: subscribe("presence-room-general")
+
+    Note over C: user types and submits
+    C->>API: POST /api/pusher/chat-update<br/>{room, username, message}
+    API->>DB: INSERT row (returns id)
+    API->>PU: trigger("presence-room-general", "chat-update", {id, username, message})
+    PU-->>C: chat-update event
+    PU-->>C2: chat-update event
+    Note over C,C2: dedupe by message id
+```
+
+### System overview
+
+```mermaid
+flowchart LR
+    subgraph Browser
+        UI[Next.js pages]
+        UI --> LC[LiveChat]
+        UI --> PC[PersistentChat]
+    end
+
+    subgraph "External services"
+        PJ[PeerJS public server<br/>peerjs.com]
+        PR[Pusher Channels]
+    end
+
+    subgraph "Next.js server (local)"
+        API[/API routes/]
+        DB[(SQLite<br/>data/chat.sqlite)]
+        API --> DB
+    end
+
+    LC <-->|signaling| PJ
+    LC <-.->|"WebRTC P2P<br/>(direct, encrypted)"| LC2[Other peer]
+
+    PC -->|"GET /api/messages"| API
+    PC -->|"POST /api/pusher/chat-update"| API
+    API -->|trigger event| PR
+    PC <-->|"subscribe presence-room-*"| PR
+```
+
 ## How the two modes work
 
 ### Live (P2P)

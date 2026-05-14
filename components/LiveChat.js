@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import ChatLayout from './ChatLayout';
 
 const sanitize = (s) => s.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
-const peerIdFor = (user) => `buddydr-${sanitize(user)}`;
+const peerIdFor = (user) => `baat-e-${sanitize(user)}`;
 
 const RETRY_MS = 3000;
 
